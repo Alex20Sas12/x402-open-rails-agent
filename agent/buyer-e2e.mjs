@@ -15,7 +15,7 @@ function loadPk(f) {
 }
 const account = privateKeyToAccount(loadPk('evm_x402_toolbox.json'))
 const client = new x402Client()
-client.register('eip155:*', new ExactEvmScheme(account, { rpcUrl: 'https://celo-sepolia.drpc.org' }))
+client.register('eip155:*', new ExactEvmScheme(account, { rpcUrl: process.env.RPC_URL || 'https://celo-sepolia.drpc.org' }))
 const payFetch = wrapFetchWithPayment(fetch, client)
 
 const URL = process.env.TARGET || 'https://open-rails-data-agent.shablony-pro.workers.dev/celo/block?network=sepolia'
