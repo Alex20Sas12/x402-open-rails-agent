@@ -1,0 +1,13 @@
+{
+  "type": "Agent",
+  "name": "Open Rails Toolbox Agent",
+  "description": "x402 pay-per-call agent exposing 330+ onchain/web data endpoints (balances, tx lookup, token metadata, search) behind the Celo x402 facilitator. Settles USDC/USDT/USA\u20ae on Celo mainnet; carries the hackathon attribution tag on every transaction it sends.",
+  "image": "https://raw.githubusercontent.com/Alex20Sas12/x402-open-rails-agent/main/agent/logo.png",
+  "endpoints": [
+    { "type": "x402", "url": "https://x402-toolbox.shablony-pro.workers.dev/openapi.json" },
+    { "type": "wallet", "address": "0x5a8DbD4788584f9C4B59eB64087a1A18fc2f7952", "chainId": 42220 }
+  ],
+  "attributionTag": "celo_d77d36f60ddb",
+  "repository": "https://github.com/Alex20Sas12/x402-open-rails-agent",
+  "supportedTrust": ["reputation"]
+}

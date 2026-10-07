@@ -1,0 +1,9 @@
+name = "open-rails-data-agent"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# agent wallet = payTo for x402 settlements AND the wallet that sends tagged ERC-8004 txs
+PAY_TO = "0x5a8DbD4788584f9C4B59eB64087a1A18fc2f7952"
+
+# X402_API_KEY is a secret — set via: npx wrangler secret put X402_API_KEY
