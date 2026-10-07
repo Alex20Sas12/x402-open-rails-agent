@@ -47,11 +47,23 @@ const agentURI = `https://raw.githubusercontent.com/${REPO}/main/agent.json`
 const tag = toDataSuffix(CODE)
 const data = concat([encodeFunctionData({ abi: IDENTITY_ABI, functionName: 'register', args: [agentURI] }), tag])
 
-const balance = await publicClient.getBalance({ address: account.address })
-console.log(`net=${net} agent=${account.address} balance=${balance}`)
-if (balance === 0n) { console.error('ERROR: no gas. Refusing to send.'); process.exit(2) }
+// Celo fee abstraction (CIP-64): pay gas in a stablecoin via its allowlisted ADAPTER address.
+// mainnet USDC adapter is in FeeCurrencyDirectory (verified: returns gasPrice); the token itself is not.
+const FEE_CURRENCY = { mainnet: '0x2F25deB3848C207fc8E0c34035B3Ba7fC157602B', sepolia: undefined }
+const STABLE = { mainnet: '0xcebA9300f2b948710d2653dD7B07f33A8B32118C' } // USDC token (6dec) on Celo
 
-const hash = await wallet.sendTransaction({ to: REGISTRY[net], data })
+const feeCurrency = FEE_CURRENCY[net]
+let balance
+if (feeCurrency) {
+  balance = await publicClient.readContract({ address: STABLE[net], abi: [{ type: 'function', name: 'balanceOf', stateMutability: 'view', inputs: [{ type: 'address' }], outputs: [{ type: 'uint256' }] }], functionName: 'balanceOf', args: [account.address] })
+  console.log(`net=${net} agent=${account.address} celoUSDC=${Number(balance) / 1e6} (fee abstraction)`)
+} else {
+  balance = await publicClient.getBalance({ address: account.address })
+  console.log(`net=${net} agent=${account.address} balance=${balance}`)
+}
+if (balance === 0n) { console.error('ERROR: no gas/fee-currency. Refusing to send.'); process.exit(2) }
+
+const hash = await wallet.sendTransaction({ to: REGISTRY[net], data, ...(feeCurrency ? { feeCurrency } : {}) })
 console.log('tx:', hash)
 const receipt = await publicClient.waitForTransactionReceipt({ hash })
 console.log('status:', receipt.status, 'block:', receipt.blockNumber)

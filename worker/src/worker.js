@@ -102,6 +102,13 @@ export default {
         routes: Object.fromEntries(Object.entries(ROUTES).map(([p, r]) => [p, { price: r.price, desc: r.desc }])),
         discovery: { openapi: "/openapi.json", x402: "/.well-known/x402" } });
       if (url.pathname === "/openapi.json") return J(openapi(url.origin));
+      // agent402-service-manifest/1 — discovery manifest for the open crawl (agent402.tools/sell).
+      // ponytail: static list mirrors ROUTES keys by construction; regenerate here if routes change.
+      if (url.pathname === "/.well-known/x402") return J({ spec: "agent402-service-manifest/1", version: 1,
+        resources: Object.keys(ROUTES).map(p => url.origin + p),
+        networks: Object.values(CAIP),
+        payTo: env.PAY_TO,
+        attribution: { "builder-code": TAG } });
       const route = ROUTES[url.pathname];
       if (!route) return J({ error: "unknown route", routes: Object.keys(ROUTES) }, 404);
 
