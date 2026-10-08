@@ -6,12 +6,12 @@ x402 pay-per-call data agent on **Celo mainnet** for the
 - **Agent wallet (payTo + sender):** `0x5a8DbD4788584f9C4B59eB64087a1A18fc2f7952`
 - **Attribution tag (ERC-8021, Schema 0):** `celo_d77d36f60ddb` — appended to the calldata of
   every transaction the agent sends, before it is sent (see `agent/register.mjs`).
-- **ERC-8004 identity:** registered from the agent wallet with the tag embedded
-  (proof of the flow on Celo Sepolia: agentId `542`,
-  [tx](https://celo-sepolia.blockscout.com/tx/0xf812be3f986ee6c3ea63bcbf90d702f4e86a22b7dc99edca7737d6c272709792),
-  tag verified on-chain with `verifyTx` → `codes: ["celo_d77d36f60ddb"]`).
-  The mainnet registration runs the same script against
-  `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` once the wallet holds gas.
+- **ERC-8004 identity (Celo mainnet):** registered from the agent wallet with the tag
+  embedded — **agentId `9883`**,
+  [tx](https://celoscan.io/tx/0xa409f20cb6a394c2498b436dc6bc234818032d73ae202035250f57e39a367cfc)
+  (block 79513970, gas paid in USDC via fee-abstraction / CIP-64, tx type `0x7b`),
+  tag verified on-chain with `verifyTx` → `codes: ["celo_d77d36f60ddb"]` (schemaId 0).
+  Registered against Identity registry `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`.
 - **Live service:** https://open-rails-data-agent.shablony-pro.workers.dev (Cloudflare Worker)
 
 ## What it does
@@ -68,6 +68,26 @@ worker/               Cloudflare Worker (service) — wrangler.toml + src/worker
 3. `mintkey.mjs` → facilitator API key by wallet signature (20 mainnet + 1000 testnet credits).
 4. `buyer-e2e.mjs` → worker 402 → buyer signs → worker calls facilitator `/verify` →
    verdict `insufficient_funds` (buyer unfunded on Sepolia) — full wiring proven.
+
+## Verified flow (Celo MAINNET, 2026-10-08)
+
+1. Gas: Relay.link permit-bridge Base USDC → Celo USDC (relayer pays gas, `bridge-relay.mjs`).
+2. `register.mjs mainnet` → identity **agentId 9883**, tag `celo_d77d36f60ddb` verified via
+   `verifyTx` on mainnet; gas paid in USDC through CIP-64 fee-abstraction.
+   [tx](https://celoscan.io/tx/0xa409f20cb6a394c2498b436dc6bc234818032d73ae202035250f57e39a367cfc)
+3. Sale (Open Corridors / x402): third-party buyer `0xab05…` bought `GET /celo/block` —
+   settled [tx](https://celoscan.io/tx/0xb8cf386b) 0.0005 USDC → payTo wallet.
+4. Build-with-buy: tagged agent wallet `0x5a8d…` paid for third-party Celo x402 services
+   (`buy-third-party.mjs` / `buy-post.mjs`), each settled on-chain in USDC:
+   - agent402.tools `/api/block-number` → tx `0xa6ae4c2a…` (0.001, 07.10)
+   - agent402.tools `/api/x402-market-pulse` → tx `0xc3e60fa8…` + `0x60546393…` (0.001 each)
+   - gateway.usebuy.ai `x.posts.search` (tikhub) → tx `0x86ff3ef7…` (0.006)
+   - gateway.usebuy.ai `youtube.videos.search` (tikhub) → tx `0xeb4ffde8…` (0.006)
+   - agent402.tools `/api/gov-data` → tx `0x998896df…` (0.001)
+
+`buy-post.mjs` registers both x402 v1 (`registerV1`, legacy `celo` network alias +
+`eip155:42220`) and v2 schemes so a single script pays any Celo x402 service; only
+`eip155:42220` routes keep settlement on Celo.
 
 ## Run
 
