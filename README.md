@@ -48,6 +48,117 @@ Discovery: `/openapi.json`, `/` (index with prices and contracts).
   toolbox lineage (`x402-toolbox`, Base+Solana, live since Sept 2026) demonstrates the
   demand side.
 
+## Examples
+
+Every route is an x402 pay-per-call. The flow is identical for all seven:
+
+1. **`GET` without payment → `402 Payment Required`** with a signed challenge
+   (`PAYMENT-REQUIRED` header + JSON body listing `accepts[]` — asset, amount in
+   base units, `payTo`, network `eip155:42220`).
+2. Buyer signs an **EIP-3009** authorization (no gas for the buyer) and retries
+   with **`X-PAYMENT: <base64 payment payload>`** (v2) or `PAYMENT-SIGNATURE` (v1).
+3. Worker asks the facilitator to `/verify`, returns the data with **`paid: true`**,
+   and settles buyer → agent wallet in the background.
+
+Below: the live 402 challenge, then each route's real result. `X-PAYMENT` value is
+elided to `<sig>` — the buyer client (`agent/buyer-e2e.mjs`, `@x402/fetch`) builds it.
+
+### 402 challenge (identical shape for all routes, amount varies)
+
+```http
+GET /celo/block HTTP/1.1
+Host: open-rails-data-agent.shablony-pro.workers.dev
+```
+```json
+HTTP/1.1 402 Payment Required
+X-PAYMENT-VERSION: 2
+{
+  "x402Version": 2,
+  "error": "PAYMENT-SIGNATURE header is required",
+  "resource": { "url": ".../celo/block", "serviceName": "open-rails-data-agent" },
+  "accepts": [
+    { "scheme": "exact", "network": "eip155:42220", "amount": "500",
+      "asset": "0xcebA9300f2b948710d2653dD7B07f33A8B32118C",
+      "payTo": "0x5a8DbD4788584f9C4B59eB64087a1A18fc2f7952",
+      "extra": { "name": "USDC", "version": "2" } }
+    /* + USDT 0x4806…3D5e, USA₮ 0xD2ab…F771 at the same amount */
+  ],
+  "extensions": { "builder-code": { "info": { "a": "celo_d77d36f60ddb" } } }
+}
+```
+
+### 1. `GET /celo/block` — 500 ($0.0005)
+
+```http
+GET /celo/block HTTP/1.1
+X-PAYMENT: ***
+```
+```json
+{ "paid": true, "route": "/celo/block", "network": "mainnet",
+  "tag": "celo_d77d36f60ddb", "blockNumber": 79635954, "hex": "0x4bf25f2" }
+```
+
+### 2. `GET /celo/gas-price` — 500 ($0.0005)
+
+```json
+{ "paid": true, "route": "/celo/gas-price", "network": "mainnet",
+  "tag": "celo_d77d36f60ddb", "wei": "202500000000", "gwei": 202.5 }
+```
+
+### 3. `GET /celo/balance?address=0x471EcE3750Da237f93B8E339c536989b8978a438` — 1000 ($0.001)
+
+```json
+{ "paid": true, "route": "/celo/balance", "network": "mainnet",
+  "tag": "celo_d77d36f60ddb",
+  "wei": "457156951045076940000", "celo": 457.15695104507694 }
+```
+
+### 4. `GET /celo/token-balance?token=0xcebA9300f2b948710d2653dD7B07f33A8B32118C&address=0x5a8DbD4788584f9C4B59eB64087a1A18fc2f7952` — 1000 ($0.001)
+
+```json
+{ "paid": true, "route": "/celo/token-balance", "network": "mainnet",
+  "tag": "celo_d77d36f60ddb",
+  "token": "0xceba9300f2b948710d2653dd7b07f33a8b32118c",
+  "address": "0x5a8dbd4788584f9c4b59eb64087a1a18fc2f7952",
+  "decimals": 6, "raw": "976208", "amount": 0.976208 }
+```
+
+### 5. `GET /celo/tx?hash=0xa409f20cb6a394c2498b436dc6bc234818032d73ae202035250f57e39a367cfc` — 2000 ($0.002)
+
+The ERC-8004 registration tx of this very agent (fee paid in USDC, type `0x7b`):
+
+```json
+{ "paid": true, "route": "/celo/tx", "network": "mainnet",
+  "tag": "celo_d77d36f60ddb",
+  "hash": "0xa409f20c…a367cfc", "type": "0x7b",
+  "from": "0x5a8dbd4788584f9c4b59eb64087a1a18fc2f7952",
+  "to": "0x8004a169fb4a3325136eb29fa0ceb6d2e539a432",
+  "feeCurrency": "0x2f25deb3848c207fc8e0c34035b3ba7fc157602b",
+  "blockNumber": "0x4bd4972", "gasUsed": "0x506c2", "value": "0x0",
+  "input": "0xf2c298be…8021  /* register(agentURI) + celo_d77d36f60ddb suffix */" }
+```
+
+### 6. `GET /celo/tx-receipt?hash=0xa409f20cb6a394c2498b436dc6bc234818032d73ae202035250f57e39a367cfc` — 2000 ($0.002)
+
+```json
+{ "paid": true, "route": "/celo/tx-receipt", "network": "mainnet",
+  "tag": "celo_d77d36f60ddb",
+  "status": "0x1", "gasUsed": "0x506c2", "effectiveGasPrice": "0x4728b51ca",
+  "logs": [ /* 8 events: USDC gas burn, NewAgent(9883), … */ ] }
+```
+
+### 7. `GET /celo/erc8004-uri?id=9883` — 2000 ($0.002)
+
+```json
+{ "paid": true, "route": "/celo/erc8004-uri", "network": "mainnet",
+  "tag": "celo_d77d36f60ddb", "agentId": "9883",
+  "registry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+  "agentURI": "https://raw.githubusercontent.com/Alex20Sas12/x402-open-rails-agent/main/agent.json" }
+```
+
+> Programmatic buyer: `agent/buyer-e2e.mjs` wraps `fetch` with `@x402/fetch` —
+> it handles the 402 → sign → retry → settle loop above in one call.
+
 ## Layout
 
 ```
