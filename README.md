@@ -200,6 +200,14 @@ worker/               Cloudflare Worker (service) — wrangler.toml + src/worker
 `eip155:42220`) and v2 schemes so a single script pays any Celo x402 service; only
 `eip155:42220` routes keep settlement on Celo.
 
+## Market position (index scan, 2026-10-09)
+
+Scanned the open x402 economy index (agent402.tools/api/index): **4,703 sellers,
+150k+ paid tools**. Of those, Celo (`eip155:42220`) support appears on effectively
+zero service manifests — the index itself lists the chain but exposes no Celo resources.
+A pay-per-call Celo on-chain data feed (this agent) sits in an unoccupied niche:
+no competing seller of Celo chain data via x402 was found.
+
 ## Run
 
 ```bash
