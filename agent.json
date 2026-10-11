@@ -7,6 +7,57 @@
     { "type": "x402", "url": "https://x402-toolbox.shablony-pro.workers.dev/openapi.json" },
     { "type": "wallet", "address": "0x5a8DbD4788584f9C4B59eB64087a1A18fc2f7952", "chainId": 42220 }
   ],
+  "services": [
+    {
+      "name": "x402",
+      "endpoint": "https://open-rails-data-agent.shablony-pro.workers.dev/celo/block",
+      "method": "GET",
+      "description": "Latest Celo block number via eth_blockNumber.",
+      "price": {"amount":"500","decimals":6,"currencies":["USDC","USDT","USAT"],"network":"eip155:42220"}
+    },
+    {
+      "name": "x402",
+      "endpoint": "https://open-rails-data-agent.shablony-pro.workers.dev/celo/gas-price",
+      "method": "GET",
+      "description": "Current Celo gas price in wei and gwei.",
+      "price": {"amount":"500","decimals":6,"currencies":["USDC","USDT","USAT"],"network":"eip155:42220"}
+    },
+    {
+      "name": "x402",
+      "endpoint": "https://open-rails-data-agent.shablony-pro.workers.dev/celo/balance",
+      "method": "GET",
+      "description": "Native CELO balance of any wallet. Params: address.",
+      "price": {"amount":"1000","decimals":6,"currencies":["USDC","USDT","USAT"],"network":"eip155:42220"}
+    },
+    {
+      "name": "x402",
+      "endpoint": "https://open-rails-data-agent.shablony-pro.workers.dev/celo/token-balance",
+      "method": "GET",
+      "description": "ERC-20 balance (USDC/USDT/any) with decimals. Params: token, address.",
+      "price": {"amount":"1000","decimals":6,"currencies":["USDC","USDT","USAT"],"network":"eip155:42220"}
+    },
+    {
+      "name": "x402",
+      "endpoint": "https://open-rails-data-agent.shablony-pro.workers.dev/celo/tx",
+      "method": "GET",
+      "description": "Full transaction by hash. Params: hash.",
+      "price": {"amount":"2000","decimals":6,"currencies":["USDC","USDT","USAT"],"network":"eip155:42220"}
+    },
+    {
+      "name": "x402",
+      "endpoint": "https://open-rails-data-agent.shablony-pro.workers.dev/celo/tx-receipt",
+      "method": "GET",
+      "description": "Transaction receipt (status, gasUsed, logs). Params: hash.",
+      "price": {"amount":"2000","decimals":6,"currencies":["USDC","USDT","USAT"],"network":"eip155:42220"}
+    },
+    {
+      "name": "x402",
+      "endpoint": "https://open-rails-data-agent.shablony-pro.workers.dev/celo/erc8004-uri",
+      "method": "GET",
+      "description": "ERC-8004 agent URI by agentId (tokenURI on the Identity registry). Params: id.",
+      "price": {"amount":"2000","decimals":6,"currencies":["USDC","USDT","USAT"],"network":"eip155:42220"}
+    }
+  ],
   "attributionTag": "celo_d77d36f60ddb",
   "repository": "https://github.com/Alex20Sas12/x402-open-rails-agent",
   "supportedTrust": ["reputation"]
