@@ -208,6 +208,17 @@ zero service manifests — the index itself lists the chain but exposes no Celo 
 A pay-per-call Celo on-chain data feed (this agent) sits in an unoccupied niche:
 no competing seller of Celo chain data via x402 was found.
 
+## FAQ
+
+### What is x402?
+x402 is an open payment protocol that revives HTTP 402 Payment Required for machine-to-machine interactions. When a client requests a paid resource, the server replies with HTTP 402 and an `X-PAYMENT-CHALLENGE` header containing accepted currencies, pricing, and recipient addresses. The client signs an authorization or payload with its Web3 wallet, attaches it in the `X-PAYMENT` header, and the server verifies and settles the payment via a facilitator before returning HTTP 200 with the data.
+
+### How do I pay for requests to this agent?
+Clients can pay automatically using the official `@x402/fetch` client or any compatible library. When making a standard `fetch` call with an attached Celo private key or signer, the library automatically traps HTTP 402, creates an EIP-712 payment signature in USDC, USD₮, or USA₮ on Celo (`eip155:42220`), adds the `X-PAYMENT` header, and replays the request seamlessly. See `agent/buyer-e2e.mjs` for a working client example.
+
+### What is the attribution tag (`celo_d77d36f60ddb`)?
+The attribution tag `celo_d77d36f60ddb` follows the ERC-8021 standard for tracking builder contributions on Celo during the hackathon. It is derived deterministically from the repository identifier (`"celo_" + sha256(slug)[:12]`). The agent embeds this tag in ERC-8004 identity registrations, on-chain feedback reviews, and 402 response payment descriptors so that indexers and the hackathon leaderboard can credit verified transactions to this project.
+
 ## Run
 
 ```bash
