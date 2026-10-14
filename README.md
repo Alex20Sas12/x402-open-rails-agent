@@ -43,10 +43,25 @@ Discovery: `/openapi.json`, `/` (index with prices and contracts).
   entry once the hosted facilitator emits Schema-2 suffixes (upstream:
   [x402-rs#99](https://github.com/x402-rs/x402-rs/pull/99); today's facilitator settlements
   are untagged by design — noted in the submission).
-- **Build with buy:** the agent itself consumes paid services through buy/x402
-  (verified paid calls into services it doesn't control), and its 330+ endpoint
-  toolbox lineage (`x402-toolbox`, Base+Solana, live since Sept 2026) demonstrates the
-  demand side.
+- **Build with buy:** the tagged agent wallet `0x5a8D…` buys third-party x402 services
+  it does not control, settled on-chain — verified from the USDC/USDC.e `Transfer` logs
+  themselves, not from our own code paths:
+  - **Pocket Network** `/v1/celo` (Celo JSON-RPC, 31 payers / 18k calls in 30 days) —
+    HTTP 200, real data returned (block `0x4c6253a`), settled
+    [tx 0x257071ae](https://basescan.org/tx/0x257071ae055b374109096f07d0481a7c328042a4bd105611e7554492ccc89304)
+    0.005 USDC.e on Base; payer `0x5a8DbD4788584f9C4B59eB64087a1A18fc2f7952` (14.10)
+  - **agent402.tools** `/api/x402-market-pulse` →
+    [tx 0xc3e60fa8](https://celoscan.io/tx/0xc3e60fa8108799f825137550238374db63b78f358ea0c95f6aeb56596b50fc65)
+    0.001 USDC → `0xabf4fabd…` (agent402.tools settlement account)
+  - **gateway.usebuy.ai** `x.posts.search` (tikhub) →
+    [tx 0x86ff3ef7](https://celoscan.io/tx/0x86ff3ef7bd2bf8d15969898e642ad68f8ccca4529cf40432fc8ddc65edcce76f)
+    0.006 USDC
+  7 purchased calls in total, 2 distinct third-party payees, all originating from the
+  agent's own tagged wallet.
+  ABApay was tried and declined: it requires real bill identifiers
+  (`serviceID/billersCode/amount`), so it cannot be exercised as a data purchase.
+  A separate 330+ endpoint toolbox (`x402-toolbox`, Base+Solana, live since Sept 2026)
+  covers the demand side.
 
 ## Examples
 
@@ -186,15 +201,13 @@ worker/               Cloudflare Worker (service) — wrangler.toml + src/worker
 2. `register.mjs mainnet` → identity **agentId 9883**, tag `celo_d77d36f60ddb` verified via
    `verifyTx` on mainnet; gas paid in USDC through CIP-64 fee-abstraction.
    [tx](https://celoscan.io/tx/0xa409f20cb6a394c2498b436dc6bc234818032d73ae202035250f57e39a367cfc)
-3. Sale (Open Corridors / x402): third-party buyer `0xab05…` bought `GET /celo/block` —
+3. Sale (Open Corridors / x402): buyer `0xab05…` (a wallet we operate, not an external
+   party) bought `GET /celo/block` —
    settled [tx](https://celoscan.io/tx/0xb8cf386b) 0.0005 USDC → payTo wallet.
-4. Build-with-buy: tagged agent wallet `0x5a8d…` paid for third-party Celo x402 services
-   (`buy-third-party.mjs` / `buy-post.mjs`), each settled on-chain in USDC:
-   - agent402.tools `/api/block-number` → tx `0xa6ae4c2a…` (0.001, 07.10)
-   - agent402.tools `/api/x402-market-pulse` → tx `0xc3e60fa8…` + `0x60546393…` (0.001 each)
-   - gateway.usebuy.ai `x.posts.search` (tikhub) → tx `0x86ff3ef7…` (0.006)
-   - gateway.usebuy.ai `youtube.videos.search` (tikhub) → tx `0xeb4ffde8…` (0.006)
-   - agent402.tools `/api/gov-data` → tx `0x998896df…` (0.001)
+   The full chain (402 → EIP-3009 → facilitator settle) is exercised, but the paying
+   party is ours; we have **no external buyer yet** and do not claim one.
+4. Build-with-buy: see the **Tracks** section above — 7 paid calls to third-party
+   services, all settled from the tagged wallet and verified against USDC Transfer logs.
 
 `buy-post.mjs` registers both x402 v1 (`registerV1`, legacy `celo` network alias +
 `eip155:42220`) and v2 schemes so a single script pays any Celo x402 service; only
