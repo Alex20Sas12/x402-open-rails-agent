@@ -70,6 +70,6 @@ queryPaidData().catch(console.error);
 
 ## How It Works
 
-1. **Initial Request**: Your script calls `payFetch(url)`. Without payment headers, the Cloudflare Worker responds with `402 Payment Required` and includes an `X-PAYMENT-CHALLENGE` header / JSON body detailing accepted assets, price, recipient (`payTo`), and the hackathon attribution tag (`celo_d77d36f60ddb`).
+1. **Initial Request**: Your script calls `payFetch(url)`. Without payment headers, the Cloudflare Worker responds with `402 Payment Required` and includes a JSON challenge body plus the base64 `PAYMENT-REQUIRED` header (`X-PAYMENT-VERSION: 2`) detailing accepted assets, price, recipient (`payTo`), and the hackathon attribution tag (`celo_d77d36f60ddb`).
 2. **Automatic Signing**: `@x402/fetch` and `ExactEvmScheme` parse the challenge, select the appropriate token (USDC, USDT, or USA₮), and prompt your account to sign an EIP-3009 transfer authorization off-chain (**zero gas for the buyer**).
 3. **Facilitator Settlement**: The signature is attached in the `X-PAYMENT` header. The worker verifies the signature against the Celo x402 facilitator (`api.x402.celo.org`), settles the payment directly to the agent wallet, and returns the requested data with `paid: true`.

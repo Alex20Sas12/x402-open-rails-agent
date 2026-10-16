@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Examples for all 7 routes with 402 flow
 - FAQ section covering x402, payment, and attribution tag
 
+### Fixed
+- Documentation named the wrong 402 challenge header (`X-PAYMENT-CHALLENGE`). The deployed
+  worker emits the JSON challenge body plus the base64 `PAYMENT-REQUIRED` header and
+  `X-PAYMENT-VERSION: 2` — README FAQ and INTEGRATION.md now say so, so hand-rolled buyers
+  parse the header that actually arrives.
+
 ## [0.1.0] - 2026-10-14
 
 ### Added
