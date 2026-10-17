@@ -56,8 +56,19 @@ Discovery: `/openapi.json`, `/` (index with prices and contracts).
   - **gateway.usebuy.ai** `x.posts.search` (tikhub) →
     [tx 0x86ff3ef7](https://celoscan.io/tx/0x86ff3ef7bd2bf8d15969898e642ad68f8ccca4529cf40432fc8ddc65edcce76f)
     0.006 USDC
-  7 purchased calls in total, 2 distinct third-party payees, all originating from the
-  agent's own tagged wallet.
+  - **Blockscout Pro API** `/42220/api/v2/celo/epochs` (Celo L2 epochs, 193 paid routes) —
+    HTTP 200 with live epoch data (epoch 2338), settled **on Celo itself**
+    [tx 0x216da15d](https://celoscan.io/tx/0x216da15d1b2d61addeb2b08219c83e8b5d2f8318df38e53b9222d639c9f2c5b7)
+    0.002 USDC → Blockscout settlement wallet `0x242ba6d6…` (17.10)
+  - **NewBotLabor Agent Preflight** `/api/celo/token-check` (Celo ERC-20 risk check) —
+    HTTP 200 with live verdict, settled
+    [tx 0x8470c7cf](https://basescan.org/tx/0x8470c7cf100217ed2936ad554c9b2d908534a48c8f5cc60b64c139982c924d42)
+    0.003 USDC.e on Base → `0x174897b2…` (17.10)
+  9 purchased calls in total, 5 distinct third-party payees (Pocket Network,
+  agent402.tools, tikhub via gateway.usebuy.ai, Blockscout, NewBotLabor), all
+  originating from the agent's own tagged wallet. The agent composes services it does
+  not control: it pays Blockscout for epoch data and NewBotLabor for token risk checks
+  on Celo, the same chain it sells data on.
   ABApay was tried and declined: it requires real bill identifiers
   (`serviceID/billersCode/amount`), so it cannot be exercised as a data purchase.
   A separate 330+ endpoint toolbox (`x402-toolbox`, Base+Solana, live since Sept 2026)
@@ -206,7 +217,7 @@ worker/               Cloudflare Worker (service) — wrangler.toml + src/worker
    settled [tx](https://celoscan.io/tx/0xb8cf386b) 0.0005 USDC → payTo wallet.
    The full chain (402 → EIP-3009 → facilitator settle) is exercised, but the paying
    party is ours; we have **no external buyer yet** and do not claim one.
-4. Build-with-buy: see the **Tracks** section above — 7 paid calls to third-party
+4. Build-with-buy: see the **Tracks** section above — 9 paid calls to third-party
    services, all settled from the tagged wallet and verified against USDC Transfer logs.
 
 `buy-post.mjs` registers both x402 v1 (`registerV1`, legacy `celo` network alias +
