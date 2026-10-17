@@ -64,11 +64,20 @@ Discovery: `/openapi.json`, `/` (index with prices and contracts).
     HTTP 200 with live verdict, settled
     [tx 0x8470c7cf](https://basescan.org/tx/0x8470c7cf100217ed2936ad554c9b2d908534a48c8f5cc60b64c139982c924d42)
     0.003 USDC.e on Base → `0x174897b2…` (17.10)
-  9 purchased calls in total, 5 distinct third-party payees (Pocket Network,
-  agent402.tools, tikhub via gateway.usebuy.ai, Blockscout, NewBotLabor), all
+  - **BlockRun** `/api/v1/rpc/celo` (Celo JSON-RPC, 260 payers / 90k calls in 30 days,
+    Bazaar-curated) — HTTP 200, live Celo block `0x4ca325a`, settled
+    [tx 0xd62a3011](https://basescan.org/tx/0xd62a3011ae21416f6a1e530601a801b5f23fd68df807c8dd466c0d5667976b52)
+    0.003 USDC on Base → BlockRun settlement wallet `0xe9030014…` (17.10)
+  - **agent402.tools** `/api/tx-status?network=celo` and `/api/gas-estimate?network=celo` —
+    Celo-aware aggregation, settled
+    [tx 0x0fc69b63](https://basescan.org/tx/0x0fc69b637944af6b35454d9b371843f34226a3589edf808b11a3a3ecefb81e3e)
+    and [tx 0x444068a3](https://basescan.org/tx/0x444068a3893dc9089b2670b87859aaad49f60b739d4f45e865c6e5b13aae64f3)
+    0.001 USDC each (17.10)
+  12 purchased calls in total, 6 distinct third-party payees (Pocket Network,
+  agent402.tools, tikhub via gateway.usebuy.ai, Blockscout, NewBotLabor, BlockRun), all
   originating from the agent's own tagged wallet. The agent composes services it does
-  not control: it pays Blockscout for epoch data and NewBotLabor for token risk checks
-  on Celo, the same chain it sells data on.
+  not control: it pays Blockscout for epoch data, BlockRun for RPC and NewBotLabor for
+  token risk checks on Celo, the same chain it sells data on.
   ABApay was tried and declined: it requires real bill identifiers
   (`serviceID/billersCode/amount`), so it cannot be exercised as a data purchase.
   A separate 330+ endpoint toolbox (`x402-toolbox`, Base+Solana, live since Sept 2026)
@@ -217,7 +226,7 @@ worker/               Cloudflare Worker (service) — wrangler.toml + src/worker
    settled [tx](https://celoscan.io/tx/0xb8cf386b) 0.0005 USDC → payTo wallet.
    The full chain (402 → EIP-3009 → facilitator settle) is exercised, but the paying
    party is ours; we have **no external buyer yet** and do not claim one.
-4. Build-with-buy: see the **Tracks** section above — 9 paid calls to third-party
+4. Build-with-buy: see the **Tracks** section above — 12 paid calls to third-party
    services, all settled from the tagged wallet and verified against USDC Transfer logs.
 
 `buy-post.mjs` registers both x402 v1 (`registerV1`, legacy `celo` network alias +
