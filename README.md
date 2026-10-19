@@ -85,6 +85,8 @@ Discovery: `/openapi.json`, `/` (index with prices and contracts).
 
 ## Examples
 
+## Security
+
 Every route is an x402 pay-per-call. The flow is identical for all seven:
 
 1. **`GET` without payment → `402 Payment Required`** with a signed challenge
