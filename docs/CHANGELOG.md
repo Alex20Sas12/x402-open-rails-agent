@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration guide for `@x402/fetch` clients
 - Examples for all 7 routes with 402 flow
 - FAQ section covering x402, payment, and attribution tag
+- Runnable self-check `npm test` (agent/test.mjs): verifies the ERC-8021 attribution tag `celo_d77d36f60ddb` on-chain against the Celo mainnet registration tx; exits non-zero if it disappears
 
 ### Fixed
 - Documentation named the wrong 402 challenge header (`X-PAYMENT-CHALLENGE`). The deployed
