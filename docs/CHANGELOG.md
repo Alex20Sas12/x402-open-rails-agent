@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - FAQ section covering x402, payment, and attribution tag
 - Runnable self-check `npm test` (agent/test.mjs): verifies the ERC-8021 attribution tag `celo_d77d36f60ddb` on-chain against the Celo mainnet registration tx; exits non-zero if it disappears
 
+- worker/src/worker.js was syntactically broken in commit 4ab8bd3 (a stray
+  `"/celo/token-balance"{...}` block replaced the tail of `openapi()`), making the repo
+  copy unparseable by `node --check` and any fresh `wrangler deploy` fail. Reverted the file
+  to the last known-good version (identical to b40fff7). The deployed worker was never
+  affected; no prices or route logic changed.
+
 ### Fixed
 - Documentation named the wrong 402 challenge header (`X-PAYMENT-CHALLENGE`). The deployed
   worker emits the JSON challenge body plus the base64 `PAYMENT-REQUIRED` header and

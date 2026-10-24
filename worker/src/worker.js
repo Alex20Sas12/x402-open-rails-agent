@@ -141,13 +141,5 @@ function openapi(origin) {
       responses: { "200": { description: "paid result (x402 settled on Celo)" }, "402": { description: "payment required" } } } };
   return { openapi: "3.1.0", info: { title: "Open Rails Data Agent", version: "1.0.0",
     description: `x402 pay-per-call Celo data endpoints. Attribution tag ${TAG}. Repo: https://github.com/Alex20Sas12/x402-open-rails-agent` },
-"\/celo\/token-balance"{ price: "1000", desc: "ERC-20 balance (USDC\/USDT\/USA₮) with decimals. Params: token, address.", fn: async u => {
-    const t = hexAddr(u.p.get("token")), a = hexAddr(u.p.get("address"));
-    const accepted = ASSETS[u.net].map(a => a.asset.toLowerCase());
-    if (!accepted.includes(t)) {
-      throw new Error("token not supported");
-    }
-    const dec = 6; // USDC, USDT, USA₮ on Celo have 6 decimals
-    const h = await rpc(u.net, "eth_call", [{ to: t, data: "0x70a08231" + p64(a) }, "latest"]);
-    return { token: t, address: a, decimals: dec, raw: BigInt(h).toString(), amount: Number(BigInt(h)) \/ 10 ** dec };
-  }
+    servers: [{ url: origin }], paths };
+}
