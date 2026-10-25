@@ -14,3 +14,28 @@ if (!r.codes.includes(TAG)) {
   process.exit(1)
 }
 console.log('ok: attribution tag', TAG, 'verified on-chain for', TX)
+
+// Drift check: the deployed worker must match the repo's declared routes/prices.
+// Guards the failure class of commit 4ab8bd3 (repo worker.js corrupted, deploy unaffected)
+// and the inverse (bad deploy diverging from repo).
+import { readFile } from 'node:fs/promises'
+
+const BASE = 'https://open-rails-data-agent.shablony-pro.workers.dev'
+const src = await readFile(new URL('../worker/src/worker.js', import.meta.url), 'utf8')
+const repoRoutes = Object.fromEntries(
+  [...src.matchAll(/"(\/celo\/[a-z0-9-]+)":\s*\{\s*price:\s*"(\d+)"/g)].map(m => [m[1], m[2]]))
+
+const man = await (await fetch(BASE + '/')).json()
+const liveRoutes = Object.fromEntries(Object.entries(man.routes).map(([p, r]) => [p, String(r.price)]))
+if (man.tag !== TAG) { console.error('FAIL: live tag', man.tag, '!=', TAG); process.exit(1) }
+if (JSON.stringify(repoRoutes) !== JSON.stringify(liveRoutes)) {
+  console.error('FAIL: repo/deploy route drift\n repo:', repoRoutes, '\n live:', liveRoutes); process.exit(1)
+}
+// One route must actually challenge with 402 and the repo price.
+const res = await fetch(BASE + '/celo/block')
+if (res.status !== 402) { console.error('FAIL: /celo/block expected 402, got', res.status); process.exit(1) }
+const ch = await res.json()
+if (ch.accepts?.[0]?.amount !== repoRoutes['/celo/block']) {
+  console.error('FAIL: 402 amount', ch.accepts?.[0]?.amount, '!= repo price', repoRoutes['/celo/block']); process.exit(1)
+}
+console.log('ok: deployed worker matches repo —', Object.keys(repoRoutes).length, 'routes, tag, 402 challenge verified')
