@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Examples for all 7 routes with 402 flow
 - FAQ section covering x402, payment, and attribution tag
 - Runnable self-check `npm test` (agent/test.mjs): verifies the ERC-8021 attribution tag `celo_d77d36f60ddb` on-chain against the Celo mainnet registration tx; exits non-zero if it disappears
+- GitHub Actions CI (.github/workflows/ci.yml): runs `npm ci` + `npm test` on every push to main and pull request, so the attribution-tag and repo↔deploy drift checks are enforced publicly, not just locally. CI badge added to README.
 - Repo↔deploy drift check in `npm test` (agent/test.mjs): compares routes/prices declared in worker/src/worker.js against the live deployed worker manifest and one real 402 challenge; exits non-zero on any divergence. Guards the failure class of commit 4ab8bd3 in both directions (corrupt repo vs. bad deploy).
 
 - worker/src/worker.js was syntactically broken in commit 4ab8bd3 (a stray

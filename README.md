@@ -1,5 +1,7 @@
 # Open Rails Data Agent
 
+[![CI](https://github.com/Alex20Sas12/x402-open-rails-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Alex20Sas12/x402-open-rails-agent/actions/workflows/ci.yml)
+
 x402 pay-per-call data agent on **Celo mainnet** for the
 [Agents on Open Rails Hackathon](https://www.loops.house/agents-on-open-rails).
 
