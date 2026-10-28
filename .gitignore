@@ -1,3 +1,6 @@
 node_modules/
 *.log
 .env
+STATE.md
+*.bak
+_outbound_full.json

@@ -29,6 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   worker emits the JSON challenge body plus the base64 `PAYMENT-REQUIRED` header and
   `X-PAYMENT-VERSION: 2` — README FAQ and INTEGRATION.md now say so, so hand-rolled buyers
   parse the header that actually arrives.
+- package.json metadata corrected: name `repo` -> `x402-open-rails-agent` (matches GitHub repo),
+  license `ISC` -> `MIT` (the shipped LICENSE file is MIT), description/author/keywords added,
+  bogus `"main": "index.js"` removed (this repo is a worker + agent scripts, not a library).
+- .gitignore: STATE.md (internal ops log), *.bak and _outbound_full.json (local artifacts)
+  no longer show up as untracked noise; none were ever committed, so git history is unchanged.
 
 ## [0.1.0] - 2026-10-14
 

@@ -1,8 +1,7 @@
 {
-  "name": "repo",
+  "name": "x402-open-rails-agent",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "x402 pay-per-call Celo data agent (Open Rails hackathon): 7 endpoints selling on-chain Celo data, settled in USDC/USDT/USAT via api.x402.celo.org",
   "scripts": {
     "test": "node agent/test.mjs"
   },
@@ -10,9 +9,18 @@
     "type": "git",
     "url": "git+https://github.com/Alex20Sas12/x402-open-rails-agent.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "x402",
+    "celo",
+    "erc-8004",
+    "erc-8021",
+    "usdc",
+    "pay-per-call",
+    "agent",
+    "cloudflare-worker"
+  ],
+  "author": "Alex20Sas12",
+  "license": "MIT",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/Alex20Sas12/x402-open-rails-agent/issues"
