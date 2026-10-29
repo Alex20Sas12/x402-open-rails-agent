@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bogus `"main": "index.js"` removed (this repo is a worker + agent scripts, not a library).
 - .gitignore: STATE.md (internal ops log), *.bak and _outbound_full.json (local artifacts)
   no longer show up as untracked noise; none were ever committed, so git history is unchanged.
+- agent.json `image` pointed at `agent/logo.png`, which was never committed — the URL 404'd since
+  the initial commit (ec54277). Added the logo (512x512 PNG, "x402" on Celo green) and an
+  `npm test` check that the declared image URL resolves (HEAD 200), so metadata can't ship broken links again.
 
 ## [0.1.0] - 2026-10-14
 

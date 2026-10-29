@@ -39,3 +39,14 @@ if (ch.accepts?.[0]?.amount !== repoRoutes['/celo/block']) {
   console.error('FAIL: 402 amount', ch.accepts?.[0]?.amount, '!= repo price', repoRoutes['/celo/block']); process.exit(1)
 }
 console.log('ok: deployed worker matches repo —', Object.keys(repoRoutes).length, 'routes, tag, 402 challenge verified')
+
+// agent.json metadata check: the declared image URL must map to a file that exists in the repo.
+// Guards the shipped bug: agent.json pointed at agent/logo.png that was never committed (404 since ec54277).
+// ponytail: local-path mapping, not a remote HEAD — deterministic in CI, no CDN lag/rate-limit flake.
+const meta = JSON.parse(await readFile(new URL('../agent.json', import.meta.url), 'utf8'))
+if (meta.image) {
+  const m = meta.image.match(/raw\.githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)$/)
+  if (!m) { console.error('FAIL: agent.json image is not a raw.githubusercontent URL:', meta.image); process.exit(1) }
+  await readFile(new URL('../' + m[1], import.meta.url)) // throws if missing
+}
+console.log('ok: agent.json image exists in repo —', meta.image)
