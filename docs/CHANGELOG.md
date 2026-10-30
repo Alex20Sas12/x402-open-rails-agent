@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Runnable self-check `npm test` (agent/test.mjs): verifies the ERC-8021 attribution tag `celo_d77d36f60ddb` on-chain against the Celo mainnet registration tx; exits non-zero if it disappears
 - GitHub Actions CI (.github/workflows/ci.yml): runs `npm ci` + `npm test` on every push to main and pull request, so the attribution-tag and repo↔deploy drift checks are enforced publicly, not just locally. CI badge added to README.
 - Repo↔deploy drift check in `npm test` (agent/test.mjs): compares routes/prices declared in worker/src/worker.js against the live deployed worker manifest and one real 402 challenge; exits non-zero on any divergence. Guards the failure class of commit 4ab8bd3 in both directions (corrupt repo vs. bad deploy).
+- agent.json services drift check in `npm test` (agent/test.mjs): the seven `services[]` entries (routes, prices, `eip155:42220` network, attribution tag) must exactly mirror worker/src/worker.js — a hand-edited agent.json can no longer diverge silently from the worker or the live manifest.
 
 - worker/src/worker.js was syntactically broken in commit 4ab8bd3 (a stray
   `"/celo/token-balance"{...}` block replaced the tail of `openapi()`), making the repo

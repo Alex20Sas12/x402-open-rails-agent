@@ -50,3 +50,18 @@ if (meta.image) {
   await readFile(new URL('../' + m[1], import.meta.url)) // throws if missing
 }
 console.log('ok: agent.json image exists in repo —', meta.image)
+
+// agent.json services drift check: services[] must mirror worker.js routes/prices exactly.
+// Prices live in 3 places (worker.js, live manifest, agent.json) — the checks above covered
+// only the first two; this closes the gap so a hand-edited agent.json can't diverge silently.
+const svcRoutes = Object.fromEntries(
+  (meta.services || []).filter(s => s.endpoint?.startsWith(BASE))
+    .map(s => [new URL(s.endpoint).pathname, String(s.price?.amount)]))
+if (JSON.stringify(svcRoutes) !== JSON.stringify(repoRoutes)) {
+  console.error('FAIL: agent.json services drift from worker.js\n agent.json:', svcRoutes, '\n worker.js:', repoRoutes); process.exit(1)
+}
+for (const s of meta.services || []) {
+  if (s.price?.network !== 'eip155:42220') { console.error('FAIL: agent.json service not on Celo mainnet:', s.endpoint, s.price?.network); process.exit(1) }
+}
+if (meta.attributionTag !== TAG) { console.error('FAIL: agent.json attributionTag', meta.attributionTag, '!=', TAG); process.exit(1) }
+console.log('ok: agent.json services match worker.js —', Object.keys(svcRoutes).length, 'routes, network eip155:42220, tag', TAG)
