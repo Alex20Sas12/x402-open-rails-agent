@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   affected; no prices or route logic changed.
 
 ### Fixed
+- agent.json identity was wrong since the first commit (ec54277): `name` said "Open Rails Toolbox Agent" and the `x402` discovery endpoint pointed at a *different* service (`x402-toolbox.shablony-pro.workers.dev`, Base/Solana, 330+ endpoints) — catalogs indexing agent.json advertised the wrong agent and its wrong openapi.json. Fixed: name/description now describe this agent, x402 endpoint points at `open-rails-data-agent.../openapi.json` (the toolbox is kept only as lineage in the description), wallet endpoint unchanged. `npm test` now fails if agent.json's x402 endpoint or name diverge from the live service openapi.
 - Documentation named the wrong 402 challenge header (`X-PAYMENT-CHALLENGE`). The deployed
   worker emits the JSON challenge body plus the base64 `PAYMENT-REQUIRED` header and
   `X-PAYMENT-VERSION: 2` — README FAQ and INTEGRATION.md now say so, so hand-rolled buyers

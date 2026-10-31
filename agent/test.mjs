@@ -65,3 +65,13 @@ for (const s of meta.services || []) {
 }
 if (meta.attributionTag !== TAG) { console.error('FAIL: agent.json attributionTag', meta.attributionTag, '!=', TAG); process.exit(1) }
 console.log('ok: agent.json services match worker.js —', Object.keys(svcRoutes).length, 'routes, network eip155:42220, tag', TAG)
+
+// agent.json identity check: the declared x402 endpoint must be THIS agent's live
+// openapi.json. Shipped bug: since ec54277 it pointed at a different service
+// (x402-toolbox, Base/Solana) and `name` said "Open Rails Toolbox Agent" —
+// catalogs indexing agent.json advertised the wrong agent.
+const x402ep = (meta.endpoints || []).find(e => e.type === 'x402')
+if (x402ep?.url !== BASE + '/openapi.json') { console.error('FAIL: agent.json x402 endpoint', x402ep?.url, '!=', BASE + '/openapi.json'); process.exit(1) }
+const oa = await (await fetch(x402ep.url)).json()
+if (oa.info?.title !== meta.name) { console.error('FAIL: live openapi title', oa.info?.title, '!= agent.json name', meta.name); process.exit(1) }
+console.log('ok: agent.json identity matches live service —', meta.name, x402ep.url)
