@@ -75,3 +75,16 @@ if (x402ep?.url !== BASE + '/openapi.json') { console.error('FAIL: agent.json x4
 const oa = await (await fetch(x402ep.url)).json()
 if (oa.info?.title !== meta.name) { console.error('FAIL: live openapi title', oa.info?.title, '!= agent.json name', meta.name); process.exit(1) }
 console.log('ok: agent.json identity matches live service —', meta.name, x402ep.url)
+
+// Docs drift check: route tables in README.md and INTEGRATION.md must match worker.js
+// prices. Prices now live in 5 copies; earlier checks cover worker/manifest/agent.json —
+// these close the two doc tables so a hand-edit can't diverge silently.
+for (const file of ['README.md', 'INTEGRATION.md']) {
+  const txt = await readFile(new URL('../' + file, import.meta.url), 'utf8')
+  const docRoutes = Object.fromEntries(
+    [...txt.matchAll(/^\| `GET (\/celo\/[a-z0-9-]+)[^`]*` \| (\d+)/gm)].map(m => [m[1], m[2]]))
+  if (JSON.stringify(docRoutes) !== JSON.stringify(repoRoutes)) {
+    console.error('FAIL: ' + file + ' route table drift\n doc:', docRoutes, '\n worker.js:', repoRoutes); process.exit(1)
+  }
+}
+console.log('ok: README/INTEGRATION route tables match worker.js prices')

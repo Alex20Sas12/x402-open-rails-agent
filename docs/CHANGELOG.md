@@ -56,3 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - N/A
+
+## 2026-11-02
+- `npm test` теперь проверяет таблицы роутов в README.md и INTEGRATION.md на совпадение
+  с ценами worker.js — 4-я и 5-я копии цен под контролем (worker/manifest/agent.json уже
+  проверялись). Негативный тест (подмена цены) даёт RC=1.
