@@ -58,6 +58,18 @@ const ROUTES = {
   } },
 };
 
+// input schema per route (mirrors openapi params; x402scan reads 402 resource.inputSchema)
+const INPUT_SCHEMAS = {
+  "/celo/block": { type: "object", properties: { network: { type: "string", enum: ["mainnet", "sepolia"] } } },
+  "/celo/gas-price": { type: "object", properties: { network: { type: "string", enum: ["mainnet", "sepolia"] } } },
+  "/celo/balance": { type: "object", required: ["address"], properties: { network: { type: "string", enum: ["mainnet", "sepolia"] }, address: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" } } },
+  "/celo/token-balance": { type: "object", required: ["token", "address"], properties: { network: { type: "string", enum: ["mainnet", "sepolia"] }, token: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" }, address: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" } } },
+  "/celo/tx": { type: "object", required: ["hash"], properties: { network: { type: "string", enum: ["mainnet", "sepolia"] }, hash: { type: "string", pattern: "^0x[0-9a-fA-F]{64}$" } } },
+  "/celo/tx-receipt": { type: "object", required: ["hash"], properties: { network: { type: "string", enum: ["mainnet", "sepolia"] }, hash: { type: "string", pattern: "^0x[0-9a-fA-F]{64}$" } } },
+  "/celo/erc8004-uri": { type: "object", required: ["id"], properties: { network: { type: "string", enum: ["mainnet", "sepolia"] }, id: { type: "string", pattern: "^[0-9]+$" } } },
+};
+const inputSchema = p => INPUT_SCHEMAS[p] || { type: "object" };
+
 // ---------- x402 v2 challenge ----------
 function accepts(net, path, env) {
   const amount = ROUTES[path].price;
@@ -68,7 +80,8 @@ function accepts(net, path, env) {
 }
 function challenge(net, path, url, env) {
   const body = { x402Version: 2, error: "PAYMENT-SIGNATURE header is required",
-    resource: { url, description: ROUTES[path].desc, mimeType: "application/json", serviceName: "open-rails-data-agent", tags: ["celo", "data", "x402"] },
+    resource: { url, description: ROUTES[path].desc, mimeType: "application/json", serviceName: "open-rails-data-agent", tags: ["celo", "data", "x402"],
+      inputSchema: inputSchema(path), outputSchema: { type: "object" } },
     accepts: accepts(net, path, env),
     extensions: { "builder-code": { info: { a: TAG },
       schema: { "$schema": "https://json-schema.org/draft/2020-12/schema", type: "object", properties: {
@@ -112,6 +125,11 @@ export default {
       const route = ROUTES[url.pathname];
       if (!route) return J({ error: "unknown route", routes: Object.keys(ROUTES) }, 404);
 
+      let p = url.searchParams;
+      if (request.method === "POST") {
+        try { const b = await request.json(); p = new URLSearchParams(b); } catch { /* keep query params */ }
+      }
+
       const xp = request.headers.get("X-PAYMENT") || request.headers.get("PAYMENT-SIGNATURE");
       if (!xp) return challenge(net, url.pathname, url.origin + url.pathname, env);
 
@@ -122,7 +140,7 @@ export default {
         return J({ x402Version: 2, error: "Invalid payment payload", details: v.data || `facilitator ${v.status}` }, 402);
 
       let result;
-      try { result = await route.fn({ net, p: url.searchParams }); }
+      try { result = await route.fn({ net, p }); }
       catch (e) { return J({ error: String(e.message || e), route: url.pathname }, 400); }
 
       ctx.waitUntil(facCall(net, "/settle", xp, reqs, env)
@@ -135,10 +153,30 @@ export default {
 };
 
 function openapi(origin) {
+  // per-route query params (x402scan parseErrors fix: "Missing input schema")
+  const Q = {
+    "/celo/balance":       { name: "address", schema: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" } },
+    "/celo/token-balance": [{ name: "token", schema: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" } }, { name: "address", schema: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" } }],
+    "/celo/tx":            { name: "hash", schema: { type: "string", pattern: "^0x[0-9a-fA-F]{64}$" } },
+    "/celo/tx-receipt":    { name: "hash", schema: { type: "string", pattern: "^0x[0-9a-fA-F]{64}$" } },
+    "/celo/erc8004-uri":   { name: "id", schema: { type: "string", pattern: "^[0-9]+$" } },
+  };
+  const netParam = { name: "network", in: "query", schema: { type: "string", enum: ["mainnet", "sepolia"] }, required: false };
+  const bodyProps = { network: { type: "string", enum: ["mainnet", "sepolia"] } };
   const paths = {};
-  for (const [p, r] of Object.entries(ROUTES))
-    paths[p] = { get: { summary: r.desc, parameters: [{ name: "network", in: "query", schema: { type: "string", enum: ["mainnet", "sepolia"] }, required: false }],
-      responses: { "200": { description: "paid result (x402 settled on Celo)" }, "402": { description: "payment required" } } } };
+  for (const [p, r] of Object.entries(ROUTES)) {
+    const extra = Q[p] ? (Array.isArray(Q[p]) ? Q[p] : [Q[p]]) : [];
+    const required = extra.map(q => q.name);
+    const props = { ...bodyProps };
+    for (const q of extra) props[q.name] = q.schema;
+    const bodySchema = { type: "object", properties: props, ...(required.length ? { required } : {}) };
+    const responses = { "200": { description: "paid result (x402 settled on Celo)", content: { "application/json": { schema: { type: "object" } } } },
+      "402": { description: "payment required" } };
+    const op = (method) => method === "get"
+      ? { summary: r.desc, parameters: [netParam, ...extra.map(q => ({ name: q.name, in: "query", required: true, schema: q.schema }))], responses }
+      : { summary: r.desc, requestBody: { required: required.length > 0, content: { "application/json": { schema: bodySchema } } }, responses };
+    paths[p] = { get: op("get"), post: op("post") };
+  }
   return { openapi: "3.1.0", info: { title: "Open Rails Data Agent", version: "1.0.0",
     description: `x402 pay-per-call Celo data endpoints. Attribution tag ${TAG}. Repo: https://github.com/Alex20Sas12/x402-open-rails-agent` },
     servers: [{ url: origin }], paths };
