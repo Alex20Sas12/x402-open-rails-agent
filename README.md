@@ -37,6 +37,15 @@ buyer → agent wallet directly. Funds never touch a custodian.
 Add `?network=sepolia` to hit the Celo Sepolia stack (development).
 Discovery: `/openapi.json`, `/` (index with prices and contracts).
 
+Every route also accepts **POST** with the same params as a JSON body — handy for tool
+calls that can't set query strings:
+
+```bash
+curl -X POST https://open-rails-data-agent.shablony-pro.workers.dev/celo/block \n  -H "Content-Type: application/json" -d '{"network":"mainnet"}'
+# 402 -> X-PAYMENT -> same settlement as GET
+curl -X POST https://open-rails-data-agent.shablony-pro.workers.dev/celo/tx \n  -H "Content-Type: application/json" -d '{"hash":"0xa409f20cb6a394c2498b436dc6bc234418032d73ae202035250f57e39a367cfc"}'
+```
+
 ### Tracks
 
 - **Open Corridors — USA₮ with x402:** real settlement between independent parties in

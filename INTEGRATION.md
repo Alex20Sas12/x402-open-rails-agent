@@ -68,6 +68,17 @@ queryPaidData().catch(console.error);
 | `GET /celo/tx-receipt?hash=` | 2000 | $0.002 | Transaction receipt (status, gas, logs) |
 | `GET /celo/erc8004-uri?id=` | 2000 | $0.002 | ERC-8004 agent URI by agentId |
 
+Every route also accepts **POST** with the same params as a JSON body (useful for tool
+calls that can't set query strings); `@x402/fetch` handles it the same way:
+
+```js
+const res = await payFetch(`${BASE}/celo/token-balance`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ token: USDC, address: buyer }),
+});
+```
+
 ## How It Works
 
 1. **Initial Request**: Your script calls `payFetch(url)`. Without payment headers, the Cloudflare Worker responds with `402 Payment Required` and includes a JSON challenge body plus the base64 `PAYMENT-REQUIRED` header (`X-PAYMENT-VERSION: 2`) detailing accepted assets, price, recipient (`payTo`), and the hackathon attribution tag (`celo_d77d36f60ddb`).

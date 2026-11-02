@@ -1,3 +1,8 @@
+
+## [Unreleased] — 2026-11-02
+### Docs
+- README + INTEGRATION: documented the POST variants of all 7 routes (JSON body instead of query string), live since 296ce99 but previously undocumented.
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
