@@ -22,4 +22,4 @@ Use the GitHub issue tracker to report bugs or suggest features.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the Apache-2.0 license of this project.
+By contributing, you agree that your contributions will be licensed under the MIT license of this project (see [LICENSE](LICENSE)).

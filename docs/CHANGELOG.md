@@ -2,6 +2,7 @@
 ## [Unreleased] — 2026-11-02
 ### Docs
 - README + INTEGRATION: documented the POST variants of all 7 routes (JSON body instead of query string), live since 296ce99 but previously undocumented.
+- License attribution fixed: CONTRIBUTING.md claimed Apache-2.0 and the README footer said "Apache-2.0 intent" while the repo actually ships MIT (LICENSE + package.json, corrected in a87154e). Both now say MIT.
 
 # Changelog
 

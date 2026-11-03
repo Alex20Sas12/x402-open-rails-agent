@@ -276,4 +276,4 @@ cd .. && node agent/register.mjs mainnet # once the wallet has Celo mainnet gas
 Sepolia CELO: https://faucet.celo.org · Mainnet USA₮ (Self KYC):
 https://cloud.google.com/application/web3/faucet/celo/mainnet
 
-Written during the hackathon window (opened 2026-10-06). Apache-2.0 intent; toolbox lineage MIT.
+Written during the hackathon window (opened 2026-10-06). MIT license (see [LICENSE](LICENSE)); toolbox lineage MIT.
