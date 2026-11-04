@@ -18,7 +18,7 @@ console.log('ok: attribution tag', TAG, 'verified on-chain for', TX)
 // Drift check: the deployed worker must match the repo's declared routes/prices.
 // Guards the failure class of commit 4ab8bd3 (repo worker.js corrupted, deploy unaffected)
 // and the inverse (bad deploy diverging from repo).
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile, rm } from 'node:fs/promises'
 
 const BASE = 'https://open-rails-data-agent.shablony-pro.workers.dev'
 const src = await readFile(new URL('../worker/src/worker.js', import.meta.url), 'utf8')
@@ -88,3 +88,23 @@ for (const file of ['README.md', 'INTEGRATION.md']) {
   }
 }
 console.log('ok: README/INTEGRATION route tables match worker.js prices')
+
+// OpenAPI drift check: worker.js builds openapi.json dynamically from ROUTES, but the
+// live document (paths, methods, schemas, servers) must stay byte-identical to the repo.
+// Guards the 7th metadata copy — a hand-edited openapi() or regressed deploy diverges silently.
+const { pathToFileURL, fileURLToPath } = await import('node:url')
+const srcMjs = await readFile(new URL('../worker/src/worker.js', import.meta.url), 'utf8')
+const tmpMjs = new URL('../worker/src/worker.tmp-test.mjs', import.meta.url)
+await writeFile(tmpMjs, srcMjs)
+const mod = await import(pathToFileURL(fileURLToPath(tmpMjs)))
+const resOA = await mod.default.fetch(
+  new Request(BASE + '/openapi.json'),
+  { PAY_TO: '0x5a8DbD4788584f9C4B59eB64087a1A18fc2f7952' }, null)
+const repoOA = await resOA.json()
+const liveOA = JSON.parse(JSON.stringify(oa))
+if (JSON.stringify(repoOA) !== JSON.stringify(liveOA)) {
+  console.error('FAIL: openapi.json drift — live document != openapi() built from repo worker.js')
+  process.exit(1)
+}
+await rm(tmpMjs)
+console.log('ok: live openapi.json byte-identical to repo openapi() —', Object.keys(repoOA.paths).length, 'paths')

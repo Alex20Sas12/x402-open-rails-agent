@@ -1,6 +1,7 @@
 
-## [Unreleased] — 2026-11-02
+## [Unreleased] — 2026-11-04
 ### Docs
+- `npm test` now also byte-compares the live `openapi.json` against `openapi()` built from the repo worker.js — the 7th copy of route/price metadata (worker.js, live manifest, agent.json services, README, INTEGRATION, openapi) is now under drift control; previously an openapi() hand-edit or regressed deploy would diverge silently. Negative-tested (price 500→501 fails with RC=1).
 - README + INTEGRATION: documented the POST variants of all 7 routes (JSON body instead of query string), live since 296ce99 but previously undocumented.
 - License attribution fixed: CONTRIBUTING.md claimed Apache-2.0 and the README footer said "Apache-2.0 intent" while the repo actually ships MIT (LICENSE + package.json, corrected in a87154e). Both now say MIT.
 
