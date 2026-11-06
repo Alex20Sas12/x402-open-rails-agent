@@ -1,4 +1,8 @@
 
+## [Unreleased] — 2026-11-06
+### Fixed
+- `npm test` now imports the worker OpenAPI module from an isolated OS temp directory and removes it in `finally`, so failed checks cannot leave or overwrite a file under `worker/src/`.
+
 ## [Unreleased] — 2026-11-04
 ### Docs
 - README POST and paid-route examples now use the verified ERC-8004 registration transaction hash; the previous typo pointed to a nonexistent transaction and made copy-pasted `/celo/tx` and `/celo/tx-receipt` examples fail.
