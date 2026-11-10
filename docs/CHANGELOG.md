@@ -1,4 +1,16 @@
 
+## [Unreleased] — 2026-11-10
+### Fixed
+- README structure broken by the Security commit (fe14c90): it inserted a bare `## Security`
+  heading directly after `## Examples`, leaving **Examples an empty heading** while all 7 route
+  walkthroughs hung under Security — a section whose promised content was never written. Removed the
+  stray heading so the examples sit under Examples again.
+- README example 1 printed `X-PAYMENT: ***` where the surrounding text says the value is elided to
+  `<sig>`; the placeholder now matches the prose (no more copy/paste of an invalid header).
+### Added
+- `npm test` fails on an empty README `##` section, or if the 7 route walkthroughs are not inside
+  `## Examples`. Negative-tested: reintroducing fe14c90 gives RC=1.
+
 ## [Unreleased] — 2026-11-06
 ### Fixed
 - `npm test` now imports the worker OpenAPI module from an isolated OS temp directory and removes it in `finally`, so failed checks cannot leave or overwrite a file under `worker/src/`.

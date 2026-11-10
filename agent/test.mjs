@@ -113,3 +113,25 @@ try {
 } finally {
   await rm(tmpDir, { recursive: true, force: true })
 }
+
+// README structure check: no empty section, and all 7 route examples must sit inside
+// `## Examples`. Guards fe14c90 — it inserted a bare `## Security` heading right after
+// `## Examples`, leaving Examples empty and burying every example under a section that
+// had no content of its own (the security text was promised in the message, never written).
+{
+  const txt = await readFile(new URL('../README.md', import.meta.url), 'utf8').then(t => t.replace(/\r\n/g, '\n'))
+  const lines = txt.split('\n')
+  const heads = lines.map((l, i) => [l, i]).filter(([l]) => /^## /.test(l))
+  for (let k = 0; k < heads.length; k++) {
+    const body = lines.slice(heads[k][1] + 1, heads[k + 1] ? heads[k + 1][1] : lines.length).join('\n').trim()
+    if (!body) { console.error('FAIL: README section is empty —', heads[k][0]); process.exit(1) }
+  }
+  const exIdx = lines.findIndex(l => /^## Examples\b/.test(l))
+  if (exIdx < 0) { console.error('FAIL: README has no ## Examples section'); process.exit(1) }
+  const exEnd = heads.find(([, i]) => i > exIdx)?.[1] ?? lines.length
+  const inExamples = lines.slice(exIdx, exEnd).filter(l => /^### \d+\. `GET \/celo\//.test(l))
+  if (inExamples.length !== Object.keys(repoRoutes).length) {
+    console.error('FAIL: README Examples has', inExamples.length, 'route walkthroughs, worker.js has', Object.keys(repoRoutes).length); process.exit(1)
+  }
+  console.log('ok: README sections non-empty,', inExamples.length, 'route examples inside ## Examples')
+}

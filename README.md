@@ -96,8 +96,6 @@ curl -X POST https://open-rails-data-agent.shablony-pro.workers.dev/celo/tx \n  
 
 ## Examples
 
-## Security
-
 Every route is an x402 pay-per-call. The flow is identical for all seven:
 
 1. **`GET` without payment → `402 Payment Required`** with a signed challenge
@@ -139,7 +137,7 @@ X-PAYMENT-VERSION: 2
 
 ```http
 GET /celo/block HTTP/1.1
-X-PAYMENT: ***
+X-PAYMENT: <sig>
 ```
 ```json
 { "paid": true, "route": "/celo/block", "network": "mainnet",
