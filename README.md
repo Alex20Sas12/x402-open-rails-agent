@@ -41,9 +41,11 @@ Every route also accepts **POST** with the same params as a JSON body — handy 
 calls that can't set query strings:
 
 ```bash
-curl -X POST https://open-rails-data-agent.shablony-pro.workers.dev/celo/block \n  -H "Content-Type: application/json" -d '{"network":"mainnet"}'
+curl -X POST https://open-rails-data-agent.shablony-pro.workers.dev/celo/block \
+  -H "Content-Type: application/json" -d '{"network":"mainnet"}'
 # 402 -> X-PAYMENT -> same settlement as GET
-curl -X POST https://open-rails-data-agent.shablony-pro.workers.dev/celo/tx \n  -H "Content-Type: application/json" -d '{"hash":"0xa409f20cb6a394c2498b436dc6bc234818032d73ae202035250f57e39a367cfc"}'
+curl -X POST https://open-rails-data-agent.shablony-pro.workers.dev/celo/tx \
+  -H "Content-Type: application/json" -d '{"hash":"0xa409f20cb6a394c2498b436dc6bc234818032d73ae202035250f57e39a367cfc"}'
 ```
 
 ### Tracks

@@ -1,3 +1,10 @@
+## [Unreleased] — 2026-11-11
+### Fixed
+- README POST snippets (shipped in 6e41aef) contained a literal backslash-n instead of a real
+  line continuation, so a copy/pasted `curl` resolved host `n` (curl: (6)) instead of the API.
+### Added
+- `npm test` fails on a literal backslash-n inside any README bash fence. Negative-tested (RC=1).
+
 
 ## [Unreleased] — 2026-11-10
 ### Fixed

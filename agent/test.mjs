@@ -134,4 +134,23 @@ try {
     console.error('FAIL: README Examples has', inExamples.length, 'route walkthroughs, worker.js has', Object.keys(repoRoutes).length); process.exit(1)
   }
   console.log('ok: README sections non-empty,', inExamples.length, 'route examples inside ## Examples')
+  // A literal backslash-n inside a bash fence renders as a stray `n` argument, so a copied
+  // curl resolves host "n" (curl: (6)) instead of the API. Shipped twice in the POST
+  // examples; fixed 2026-11-11. (backslash spelled BS so this check can't match itself)
+  const BS = String.fromCharCode(92)
+  const NL = String.fromCharCode(10)
+  const fences = []
+  let cur = null
+  for (const l of lines) {
+    if (/^```/.test(l)) {
+      if (cur) { fences.push(cur); cur = null } else { cur = { info: l.slice(3).trim(), body: [] } }
+      continue
+    }
+    if (cur) cur.body.push(l)
+  }
+  const bash = fences.filter(f => f.info.startsWith('bash'))
+  for (const f of bash) {
+    if (f.body.join(NL).includes(BS + 'n')) { console.error('FAIL: literal backslash-n inside a README bash block'); process.exit(1) }
+  }
+  console.log('ok: no literal backslash-n in', bash.length, 'README bash blocks')
 }
