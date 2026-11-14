@@ -154,3 +154,20 @@ try {
   }
   console.log('ok: no literal backslash-n in', bash.length, 'README bash blocks')
 }
+
+// CHANGELOG structure check: entries had been prepended ABOVE the `# Changelog` H1 (title
+// rendered mid-document on GitHub), and the 2026-11-02 entry was orphaned after the released
+// `## [0.1.0]` section (looked like part of that release). Guards: title must be the first
+// heading; every dated `##` entry must sit before the first released `## [x.y.z]` section.
+{
+  const txt = await readFile(new URL('../docs/CHANGELOG.md', import.meta.url), 'utf8').then(t => t.replace(/\r\n/g, '\n'))
+  const lines = txt.split('\n')
+  const h1 = lines.findIndex(l => /^# /.test(l))
+  const firstHead = lines.findIndex(l => /^#{1,2} /.test(l))
+  if (h1 < 0 || h1 !== firstHead) { console.error('FAIL: CHANGELOG title is not the first heading (first heading at line', firstHead + 1, ')'); process.exit(1) }
+  const rel = lines.findIndex(l => /^## \[\d/.test(l))
+  const dated = lines.map((l, i) => [l, i]).filter(([l]) => /^## (?!\[\d)/.test(l) && /20\d\d-\d\d-\d\d/.test(l))
+  const bad = rel >= 0 ? dated.find(([, i]) => i > rel) : null
+  if (bad) { console.error('FAIL: dated CHANGELOG entry after a released version section —', bad[0]); process.exit(1) }
+  console.log('ok: CHANGELOG title first,', dated.length, 'dated entries all before', rel >= 0 ? 'the release section' : 'EOF')
+}

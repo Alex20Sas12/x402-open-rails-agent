@@ -1,34 +1,3 @@
-## [Unreleased] — 2026-11-11
-### Fixed
-- README POST snippets (shipped in 6e41aef) contained a literal backslash-n instead of a real
-  line continuation, so a copy/pasted `curl` resolved host `n` (curl: (6)) instead of the API.
-### Added
-- `npm test` fails on a literal backslash-n inside any README bash fence. Negative-tested (RC=1).
-
-
-## [Unreleased] — 2026-11-10
-### Fixed
-- README structure broken by the Security commit (fe14c90): it inserted a bare `## Security`
-  heading directly after `## Examples`, leaving **Examples an empty heading** while all 7 route
-  walkthroughs hung under Security — a section whose promised content was never written. Removed the
-  stray heading so the examples sit under Examples again.
-- README example 1 printed `X-PAYMENT: ***` where the surrounding text says the value is elided to
-  `<sig>`; the placeholder now matches the prose (no more copy/paste of an invalid header).
-### Added
-- `npm test` fails on an empty README `##` section, or if the 7 route walkthroughs are not inside
-  `## Examples`. Negative-tested: reintroducing fe14c90 gives RC=1.
-
-## [Unreleased] — 2026-11-06
-### Fixed
-- `npm test` now imports the worker OpenAPI module from an isolated OS temp directory and removes it in `finally`, so failed checks cannot leave or overwrite a file under `worker/src/`.
-
-## [Unreleased] — 2026-11-04
-### Docs
-- README POST and paid-route examples now use the verified ERC-8004 registration transaction hash; the previous typo pointed to a nonexistent transaction and made copy-pasted `/celo/tx` and `/celo/tx-receipt` examples fail.
-- `npm test` now also byte-compares the live `openapi.json` against `openapi()` built from the repo worker.js — the 7th copy of route/price metadata (worker.js, live manifest, agent.json services, README, INTEGRATION, openapi) is now under drift control; previously an openapi() hand-edit or regressed deploy would diverge silently. Negative-tested (price 500→501 fails with RC=1).
-- README + INTEGRATION: documented the POST variants of all 7 routes (JSON body instead of query string), live since 296ce99 but previously undocumented.
-- License attribution fixed: CONTRIBUTING.md claimed Apache-2.0 and the README footer said "Apache-2.0 intent" while the repo actually ships MIT (LICENSE + package.json, corrected in a87154e). Both now say MIT.
-
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -71,6 +40,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the initial commit (ec54277). Added the logo (512x512 PNG, "x402" on Celo green) and an
   `npm test` check that the declared image URL resolves (HEAD 200), so metadata can't ship broken links again.
 
+## 2026-11-14
+### Fixed
+- CHANGELOG structure was broken since entries began being prepended instead of inserted:
+  five dated `## [Unreleased] — DATE` blocks sat ABOVE the `# Changelog` H1 (GitHub rendered
+  the title in the middle of the page), and the 2026-11-02 entry was orphaned AFTER the
+  released `## [0.1.0]` section (rendered as part of that release). Reordered to Keep-a-
+  Changelog layout: H1 + intro, `## [Unreleased]`, dated sections newest-first, then `## [0.1.0]`.
+  Content preserved verbatim (only heading lines changed: `## [Unreleased] — DATE` -> `## DATE`).
+### Added
+- `npm test` now fails if the CHANGELOG H1 is not the first heading, or if any dated entry
+  sits after a released version section. Negative-tested both ways (RC=1).
+
+## 2026-11-11
+### Fixed
+- README POST snippets (shipped in 6e41aef) contained a literal backslash-n instead of a real
+  line continuation, so a copy/pasted `curl` resolved host `n` (curl: (6)) instead of the API.
+### Added
+- `npm test` fails on a literal backslash-n inside any README bash fence. Negative-tested (RC=1).
+
+## 2026-11-10
+### Fixed
+- README structure broken by the Security commit (fe14c90): it inserted a bare `## Security`
+  heading directly after `## Examples`, leaving **Examples an empty heading** while all 7 route
+  walkthroughs hung under Security — a section whose promised content was never written. Removed the
+  stray heading so the examples sit under Examples again.
+- README example 1 printed `X-PAYMENT: ***` where the surrounding text says the value is elided to
+  `<sig>`; the placeholder now matches the prose (no more copy/paste of an invalid header).
+### Added
+- `npm test` fails on an empty README `##` section, or if the 7 route walkthroughs are not inside
+  `## Examples`. Negative-tested: reintroducing fe14c90 gives RC=1.
+
+## 2026-11-06
+### Fixed
+- `npm test` now imports the worker OpenAPI module from an isolated OS temp directory and removes it in `finally`, so failed checks cannot leave or overwrite a file under `worker/src/`.
+
+## 2026-11-04
+### Docs
+- README POST and paid-route examples now use the verified ERC-8004 registration transaction hash; the previous typo pointed to a nonexistent transaction and made copy-pasted `/celo/tx` and `/celo/tx-receipt` examples fail.
+- `npm test` now also byte-compares the live `openapi.json` against `openapi()` built from the repo worker.js — the 7th copy of route/price metadata (worker.js, live manifest, agent.json services, README, INTEGRATION, openapi) is now under drift control; previously an openapi() hand-edit or regressed deploy would diverge silently. Negative-tested (price 500→501 fails with RC=1).
+- README + INTEGRATION: documented the POST variants of all 7 routes (JSON body instead of query string), live since 296ce99 but previously undocumented.
+- License attribution fixed: CONTRIBUTING.md claimed Apache-2.0 and the README footer said "Apache-2.0 intent" while the repo actually ships MIT (LICENSE + package.json, corrected in a87154e). Both now say MIT.
+
+## 2026-11-02
+- `npm test` теперь проверяет таблицы роутов в README.md и INTEGRATION.md на совпадение
+  с ценами worker.js — 4-я и 5-я копии цен под контролем (worker/manifest/agent.json уже
+  проверялись). Негативный тест (подмена цены) даёт RC=1.
+
 ## [0.1.0] - 2026-10-14
 
 ### Added
@@ -87,8 +103,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - N/A
-
-## 2026-11-02
-- `npm test` теперь проверяет таблицы роутов в README.md и INTEGRATION.md на совпадение
-  с ценами worker.js — 4-я и 5-я копии цен под контролем (worker/manifest/agent.json уже
-  проверялись). Негативный тест (подмена цены) даёт RC=1.
